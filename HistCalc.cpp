@@ -9,9 +9,24 @@ using namespace cv;
 /**
  * @function main
  */
-int main( int argc, char** argv )
-{
 
+Mat showHist(Mat& test1, Mat& histImage, int histSize){
+  // // Draw the histograms for B, G and R
+  int hist_w = 512; int hist_h = 400;
+  int bin_w = cvRound( (double) hist_w/histSize );
+  Mat m( hist_h, hist_w, CV_8UC1, Scalar( 0) );
+
+  /// Draw for each channel
+  for( int i = 1; i < histSize; i++ )
+  {
+       rectangle( histImage, Point( bin_w*(i),  hist_h) ,
+                        Point( (bin_w*(i))+bin_w,  hist_h - test1.at<float>(i)),
+                        Scalar( 255, 255, 255),-1, 8);
+  }
+  return m;
+}
+
+Mat createHist(Mat& test1, Mat& histImage){
   /// Establish the number of bins
   int histSize = 20;
 
@@ -32,27 +47,17 @@ int main( int argc, char** argv )
   test.at<float>(15,3) = 11;
 
   /// Compute the histograms:
-  Mat test1;
   calcHist( &test, 1, 0, Mat(), test1, 1, &histSize, &histRange, uniform, accumulate );
 
-  // // Draw the histograms for B, G and R
-  int hist_w = 512; int hist_h = 400;
-  int bin_w = cvRound( (double) hist_w/histSize );
+  return showHist(test1, histImage, histSize);
+}
 
-  Mat histImage( hist_h, hist_w, CV_8UC1, Scalar( 0) );
+int main( int argc, char** argv )
+{
+  Mat test1;
 
-  /// Normalize the result to [ 0, histImage.rows ]
-  // normalize(test1, test1, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-  // normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-  // normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+  Mat histImage = createHist(test1, histImage);
 
-  /// Draw for each channel
-  for( int i = 1; i < histSize; i++ )
-  {
-       rectangle( histImage, Point( bin_w*(i),  hist_h) ,
-                        Point( (bin_w*(i))+bin_w,  hist_h - test1.at<float>(i)),
-                        Scalar( 255, 255, 255),-1, 8);
-  }
 
   /// Display
   namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
