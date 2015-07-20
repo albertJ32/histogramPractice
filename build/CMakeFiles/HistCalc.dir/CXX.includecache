@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/james-tt/Dropbox/Term 2/Final project/OpenCv Programs/3 Image Processing/HistCalc/HistCalc.cpp
+opencv2/highgui/highgui.hpp
+/home/james-tt/Dropbox/Term 2/Final project/OpenCv Programs/3 Image Processing/HistCalc/opencv2/highgui/highgui.hpp
+opencv2/imgproc/imgproc.hpp
+/home/james-tt/Dropbox/Term 2/Final project/OpenCv Programs/3 Image Processing/HistCalc/opencv2/imgproc/imgproc.hpp
+iostream
+-
+stdio.h
+-
+
