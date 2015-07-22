@@ -11,11 +11,11 @@ using namespace cv;
  */
 
 // Get highest histogram value for window calibration
-float highestVal(Mat& test1){
+float highestVal(Mat test1){
     if(!test1.data){
       cout << "highestVal Mat was unable to load" << endl;
     }
-    float high = 0;
+    float high = 0.0;
 
     for(int i = 0;i < test1.rows;i++){
       for(int j = 0;j < test1.cols;j++){
@@ -28,7 +28,7 @@ float highestVal(Mat& test1){
     return high;
 }
 
-
+// Draw histogram
 Mat showHist(Mat& test1, Mat& histImage, int histSize){
   // Draw the histograms for B, G and R
   int hist_w = 512; int hist_h = 400;
@@ -39,6 +39,7 @@ Mat showHist(Mat& test1, Mat& histImage, int histSize){
   // Calibrate the maximum histogram value at 80% of window height
   float high = highestVal(test1);
   float scaleFactor = ((hist_h*0.8)/high);
+  //cout << "this is the size: " << histImage.size() << endl;
 
   /// Draw for each channel
   for( int i = 0; i < histSize; i++ )
@@ -51,9 +52,10 @@ Mat showHist(Mat& test1, Mat& histImage, int histSize){
   return m;
 }
 
+// Create Hist variables and return histogram
 Mat createHist(Mat& test1, Mat& histImage){
   /// Establish the number of bins
-  int histSize = 20;
+  int histSize = 100;
 
   /// Set the ranges ( for B,G,R) )
   float range[] = { 0, 100 } ;
@@ -69,16 +71,41 @@ Mat createHist(Mat& test1, Mat& histImage){
   return showHist(test, histImage, histSize);
 }
 
+void getImgs(Mat& img){
+  VideoCapture stream1(1);
+  if(!stream1.isOpened()){
+    cout << "cannot open video stream" << endl;
+  }
+
+  while(true){
+    Mat imgTmp;
+    stream1.read(imgTmp);
+    imshow("VideoStream", imgTmp);
+    char key = waitKey(30);
+    if(key == 'q'){
+      cout << "this is the leypress" << key << endl;
+      imgTmp.copyTo(img);
+      break;
+    }
+  }
+}
+
 int main( int argc, char** argv )
 {
-  Mat test1 = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
-  if(!test1.data){
-    cout << "unable to load image" << endl;
+  Mat savedPic;
+
+  getImgs(savedPic);
+  if(!savedPic.data){
+    cout << "savedPic does not have any data.." << endl;
     return -1;
   }
-  equalizeHist(test1, test1);
+  
+  // Equalise captured image
+  cvtColor(savedPic, savedPic, CV_BGR2GRAY);
+  equalizeHist(savedPic, savedPic);
 
-  Mat histImage = createHist(test1, histImage);
+  // Calculate and return histogram representation
+  Mat histImage = createHist(savedPic, histImage);
 
   /// Display
   namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
