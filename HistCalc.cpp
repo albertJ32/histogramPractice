@@ -10,26 +10,9 @@ using namespace cv;
  * @function main
  */
 
-// Get highest histogram value for window calibration
-float highestVal(Mat test1){
-    if(!test1.data){
-      cout << "highestVal Mat was unable to load" << endl;
-    }
-    float high = 0.0;
-
-    for(int i = 0;i < test1.rows;i++){
-      for(int j = 0;j < test1.cols;j++){
-        if(test1.at<float>(i, j) > high){
-          high = test1.at<float>(i, j);
-        }
-      }
-    }
-    cout << "This is the high value.. " << high  << endl;
-    return high;
-}
 
 // Draw histogram
-Mat showHist(Mat& test1, Mat& histImage, int histSize){
+Mat showHist(Mat& test1, Mat& histImage, int histSize, float maxVal){
   // Draw the histograms for B, G and R
   int hist_w = 512; int hist_h = 400;
   int bin_w = floorf( (double) hist_w/histSize );
@@ -37,8 +20,7 @@ Mat showHist(Mat& test1, Mat& histImage, int histSize){
   Mat m( hist_h, hist_w, CV_8UC1, Scalar( 0) );
 
   // Calibrate the maximum histogram value at 80% of window height
-  float high = highestVal(test1);
-  float scaleFactor = ((hist_h*0.8)/high);
+  float scaleFactor = ((hist_h*0.8)/maxVal);
   //cout << "this is the size: " << histImage.size() << endl;
 
   /// Draw for each channel
@@ -53,12 +35,9 @@ Mat showHist(Mat& test1, Mat& histImage, int histSize){
 }
 
 // Create Hist variables and return histogram
-Mat createHist(Mat& test1, Mat& histImage){
-  /// Establish the number of bins
-  int histSize = 100;
-
+Mat createHist(Mat& test1, int histSize){
   /// Set the ranges ( for B,G,R) )
-  float range[] = { 0, 100 } ;
+  float range[] = { 0, 256 } ;
   const float* histRange = { range };
 
   bool uniform = true; bool accumulate = false;
@@ -68,7 +47,7 @@ Mat createHist(Mat& test1, Mat& histImage){
   /// Compute the histograms:
   calcHist( &test1, 1, 0, Mat(), test, 1, &histSize, &histRange, uniform, accumulate );
 
-  return showHist(test, histImage, histSize);
+  return test;
 }
 
 void getImgs(Mat& img, Mat& img2){
@@ -104,15 +83,31 @@ void getImgs(Mat& img, Mat& img2){
   }
 }
 
+double maxVal(Mat in1, Mat in2){
+  double min1, min2,max1,max2;
+
+  minMaxIdx(in1, &min1, &max1);
+  minMaxIdx(in2, &min2, &max2);
+
+  if(max1 > max2){
+    max1 = max2;
+  }
+
+return max1;
+}
+
 int main( int argc, char** argv )
 {
   Mat savedPic1, savedPic2;
+  /// Establish the number of bins
+  int histSize = 100;
 
   getImgs(savedPic1, savedPic2);
   if(savedPic1.empty() || savedPic2.empty()){
     cout << "savedPic does not have any data.." << endl;
     return -1;
   }
+
 
   // Equalise captured images
   cvtColor(savedPic1, savedPic1, CV_BGR2GRAY);
@@ -121,14 +116,20 @@ int main( int argc, char** argv )
   cvtColor(savedPic2, savedPic2, CV_BGR2GRAY);
   equalizeHist(savedPic2, savedPic2);
 
+
   // Calculate and return histogram representation
-  Mat histImage = createHist(savedPic1, histImage);
+  Mat hist1 = createHist(savedPic1, histSize);
+  Mat hist2 = createHist(savedPic2, histSize);
+
+  double max = maxVal(savedPic1, savedPic2);
+  cout << "\n max value is:" << max <<  endl;
+
+  //  showHist(test, histImage, histSize);
 
   /// Display
   namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
-  imshow("calcHist Demo", histImage );
+//  imshow("calcHist Demo", histImage );
 
   waitKey(0);
-
   return 0;
 }
