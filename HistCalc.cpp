@@ -12,7 +12,7 @@ using namespace cv;
 
 
 // Draw histogram
-Mat showHist(Mat& test1, Mat& histImage, int histSize, float maxVal){
+Mat showHist(Mat& test1, Mat& histImage, int histSize, double maxVal){
   // Draw the histograms for B, G and R
   int hist_w = 512; int hist_h = 400;
   int bin_w = floorf( (double) hist_w/histSize );
@@ -31,7 +31,9 @@ Mat showHist(Mat& test1, Mat& histImage, int histSize, float maxVal){
                         Point( (bin_w*(i))+bin_w,  hist_h - (test1.at<float>(i)*scaleFactor)),
                         Scalar( 255, 255, 255),-1, 8);
   }
-  return m;
+  /// Display
+
+  return histImage;
 }
 
 // Create Hist variables and return histogram
@@ -41,12 +43,10 @@ Mat createHist(Mat& test1, int histSize){
   const float* histRange = { range };
 
   bool uniform = true; bool accumulate = false;
-
   Mat test;
 
   /// Compute the histograms:
   calcHist( &test1, 1, 0, Mat(), test, 1, &histSize, &histRange, uniform, accumulate );
-
   return test;
 }
 
@@ -98,7 +98,7 @@ return max1;
 
 int main( int argc, char** argv )
 {
-  Mat savedPic1, savedPic2;
+  Mat savedPic1, savedPic2, histImage;
   /// Establish the number of bins
   int histSize = 100;
 
@@ -124,11 +124,11 @@ int main( int argc, char** argv )
   double max = maxVal(savedPic1, savedPic2);
   cout << "\n max value is:" << max <<  endl;
 
-  //  showHist(test, histImage, histSize);
+  Mat m =  showHist(hist1, histImage, histSize, max);
 
-  /// Display
-  namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
-//  imshow("calcHist Demo", histImage );
+  // /// Display
+  // namedWindow("blah", CV_WINDOW_AUTOSIZE );
+  // imshow("blah", m );
 
   waitKey(0);
   return 0;
